@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import crypto from "crypto";
 import { verifyToken } from "@/lib/auth"; // Auth के लिए इम्पोर्ट किया गया
 import db from "@/lib/db"; // 'pool' को 'db' से रिप्लेस किया गया है
 
@@ -16,38 +15,64 @@ export async function POST(req) {
     if (!user) return NextResponse.json({ success: false, message: "Invalid Token" }, { status: 401 });
 
     // 3. Frontend से डेटा रिसीव करना
-    const { 
-      razorpay_order_id, 
-      razorpay_payment_id, 
-      razorpay_signature, 
-      dbOrderId,
-      amount 
-    } = await req.json();
+    // अब frontend सिर्फ orderId (जो 'ORD-...' फॉर्मेट में है) भेज रहा है
+    const { orderId } = await req.json();
 
-    const secret = process.env.RAZORPAY_KEY_SECRET;
-
-    // 4. Verify Signature (Razorpay का लॉजिक)
-    const generated_signature = crypto
-      .createHmac("sha256", secret)
-      .update(razorpay_order_id + "|" + razorpay_payment_id)
-      .digest("hex");
-
-    if (generated_signature !== razorpay_signature) {
-      return NextResponse.json({ success: false, message: "Invalid Signature" }, { status: 400 });
+    if (!orderId) {
+      return NextResponse.json({ success: false, message: "Order ID is required" }, { status: 400 });
     }
 
-    // 5. Update Database (Payment Success) - db.query का इस्तेमाल
+    // 4. Verify Payment Status from Cashfree API (Server-to-Server)
+    const cashfreeResponse = await fetch(`https://sandbox.cashfree.com/pg/orders/${orderId}`, {
+      method: "GET",
+      headers: {
+        "x-client-id": process.env.CASHFREE_APP_ID,
+        "x-client-secret": process.env.CASHFREE_SECRET_KEY,
+        "x-api-version": "2023-08-01",
+        "Accept": "application/json"
+      }
+    });
+
+    const cashfreeData = await cashfreeResponse.json();
+
+    if (!cashfreeResponse.ok) {
+      console.error("Cashfree Verification Fetch Error:", cashfreeData);
+      return NextResponse.json({ success: false, message: "Failed to fetch order status from gateway" }, { status: 500 });
+    }
+
+    // Cashfree में status "PAID" होना चाहिए
+    if (cashfreeData.order_status !== "PAID") {
+      return NextResponse.json({ success: false, message: "Payment not completed or failed" }, { status: 400 });
+    }
+
+    // 5. Update Database
+    // Cashfree का internal order id और amount निकाल लेते हैं
+    const cfPaymentId = cashfreeData.cf_order_id?.toString() || orderId; 
+    const amount = cashfreeData.order_amount;
+
+    // Database से असल 'id' (dbOrderId) निकालते हैं 'orderNumber' के ज़रिये
+    const [orders] = await db.query(
+      `SELECT id FROM orders WHERE orderNumber = ? AND userId = ?`, 
+      [orderId, user.id]
+    );
+
+    if (orders.length === 0) {
+      return NextResponse.json({ success: false, message: "Order not found in database" }, { status: 404 });
+    }
+
+    const dbOrderId = orders[0].id;
+
     // Update `orders` table
     await db.query(
       `UPDATE orders SET paymentStatus = 'PAID', transactionId = ? WHERE id = ? AND userId = ?`,
-      [razorpay_payment_id, dbOrderId, user.id] // user.id ऐड किया ताकि कोई दूसरे का आर्डर अपडेट न कर सके
+      [cfPaymentId, dbOrderId, user.id] 
     );
 
     // Insert into `payments` table
     await db.query(
       `INSERT INTO payments (orderId, paymentGateway, transactionId, amount, paymentStatus) 
-      VALUES (?, 'RAZORPAY', ?, ?, 'SUCCESS')`,
-      [dbOrderId, razorpay_payment_id, amount]
+      VALUES (?, 'CASHFREE', ?, ?, 'SUCCESS')`,
+      [dbOrderId, cfPaymentId, amount]
     );
 
     return NextResponse.json({ success: true, message: "Payment Verified Successfully" });

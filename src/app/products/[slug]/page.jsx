@@ -176,30 +176,37 @@ export default function ProductDetails({ params }) {
   };
 
   // ================= BUY NOW (RAZORPAY CHECKOUT) =================
+  // ================= BUY NOW (CASHFREE CHECKOUT) =================
   const handleBuyNowClick = () => {
     const token = getToken();
     if (!token) return alert("Please login to purchase items.");
     setCheckoutStep(true);
   };
 
-  const loadRazorpayScript = () => {
+  // 1. Load the Cashfree SDK Script
+  const loadCashfreeScript = () => {
     return new Promise((resolve) => {
+      if (window.Cashfree) {
+        resolve(true);
+        return;
+      }
       const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
       script.onload = () => resolve(true);
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
     });
   };
 
+  // 2. Process Payment via Cashfree
   const processPayment = async () => {
     if (!selectedAddressId) return alert("Please select a delivery address.");
     
     setIsProcessing(true);
 
-    const res = await loadRazorpayScript();
-    if (!res) {
-      alert("Razorpay SDK failed to load. Are you online?");
+    const isLoaded = await loadCashfreeScript();
+    if (!isLoaded) {
+      alert("Cashfree SDK failed to load. Are you online?");
       setIsProcessing(false);
       return;
     }
@@ -208,7 +215,8 @@ export default function ProductDetails({ params }) {
       const numericPrice = parseFloat(product.price) || 0;
       const totalAmount = numericPrice * quantity;
 
-      const orderData = await fetch("/api/checkout/create-order", {
+      // STEP A: Create the order on your backend
+      const response = await fetch("/api/checkout/create-order", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -223,26 +231,39 @@ export default function ProductDetails({ params }) {
             image: getImageUrl(product.thumbnail)
           }],
           subtotal: totalAmount,
-          discount: 0,
           total: totalAmount,
           addressId: selectedAddressId 
         }),
-      }).then((t) => t.json());
+      });
+      
+      const orderData = await response.json();
 
-      if (orderData.error) {
-        alert(orderData.error);
+      // Ensure your backend returns the payment_session_id from Cashfree
+      if (orderData.error || !orderData.payment_session_id) {
+        alert(orderData.error || "Failed to initiate Cashfree payment session.");
         setIsProcessing(false);
         return;
       }
 
-      const options = {
-        key:'rzp_test_SP9jN7EU7xYk0r', 
-        amount: orderData.order.amount,
-        currency: orderData.order.currency,
-        name: "FURNITURE STORE",
-        description: `Purchase: ${product.name}`,
-        order_id: orderData.order.id, 
-        handler: async function (response) {
+      // STEP B: Initialize Cashfree
+      const cashfree = window.Cashfree({
+        mode: "sandbox", // Change to "production" when deploying live
+      });
+
+      // STEP C: Open the Cashfree Checkout Modal
+      const checkoutOptions = {
+        paymentSessionId: orderData.payment_session_id,
+        redirectTarget: "_modal", // Keeps the user on the same page
+      };
+
+      cashfree.checkout(checkoutOptions).then(async (result) => {
+        if (result.error) {
+          alert(`Payment Failed: ${result.error.message}`);
+          setIsProcessing(false);
+        }
+        
+        if (result.paymentDetails) {
+          // STEP D: Verify payment status on your backend
           const verifyData = await fetch("/api/checkout/verify", {
             method: "POST",
             headers: { 
@@ -250,11 +271,7 @@ export default function ProductDetails({ params }) {
               "Authorization": `Bearer ${getToken()}` 
             },
             body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              dbOrderId: orderData.dbOrderId, 
-              amount: totalAmount
+              orderId: orderData.order_id, // Pass the Cashfree order ID to verify
             }),
           }).then((t) => t.json());
 
@@ -263,18 +280,10 @@ export default function ProductDetails({ params }) {
             router.push("/success"); 
           } else {
             alert("Payment Verification Failed!");
-          }
-        },
-        theme: { color: brandBrown },
-        modal: {
-          ondismiss: function() {
             setIsProcessing(false);
           }
         }
-      };
-
-      const paymentObject = new window.Razorpay(options);
-      paymentObject.open();
+      });
 
     } catch (error) {
       console.error(error);

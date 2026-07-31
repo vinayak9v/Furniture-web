@@ -111,16 +111,24 @@ export default function CartPage() {
   };
 
   // ================= RAZORPAY INTEGRATION =================
-  const loadRazorpayScript = () => {
+// ================= CASHFREE INTEGRATION =================
+  
+  // 1. Load Cashfree SDK
+  const loadCashfreeScript = () => {
     return new Promise((resolve) => {
+      if (window.Cashfree) {
+        resolve(true);
+        return;
+      }
       const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
       script.onload = () => resolve(true);
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
     });
   };
 
+  // 2. Handle Checkout Process
   const handleCheckout = async () => {
     if (!selectedAddressId) {
       return alert("Please select a delivery address to proceed.");
@@ -133,15 +141,15 @@ export default function CartPage() {
 
     setIsProcessing(true);
 
-    const res = await loadRazorpayScript();
-    if (!res) {
-      alert("Razorpay SDK failed to load. Are you online?");
+    const isLoaded = await loadCashfreeScript();
+    if (!isLoaded) {
+      alert("Cashfree SDK failed to load. Are you online?");
       setIsProcessing(false);
       return;
     }
 
     try {
-      // Create Order API with Address ID
+      // Step A: Create Order API Call
       const orderData = await fetch("/api/checkout/create-order", {
         method: "POST",
         headers: { 
@@ -151,27 +159,38 @@ export default function CartPage() {
         body: JSON.stringify({
           items: cartItems,
           subtotal,
-          discount, // Sending 0 to backend
+          discount, 
           total,
           addressId: selectedAddressId 
         }),
       }).then((t) => t.json());
 
-      if (orderData.error) {
-        alert(orderData.error);
+      // Ensure backend returns payment_session_id
+      if (orderData.error || !orderData.payment_session_id) {
+        alert(orderData.error || "Failed to initiate Cashfree payment session.");
         setIsProcessing(false);
         return;
       }
 
-      const options = {
-        key: 'rzp_test_SP9jN7EU7xYk0r', 
-        amount: orderData.order.amount,
-        currency: orderData.order.currency,
-        name: "FURNITURE STORE",
-        description: "Order Payment",
-        order_id: orderData.order.id, 
-        handler: async function (response) {
-          // Verify Payment
+      // Step B: Initialize Cashfree
+      const cashfree = window.Cashfree({
+        mode: "sandbox", // लाइव करते समय इसे "production" कर दें
+      });
+
+      const checkoutOptions = {
+        paymentSessionId: orderData.payment_session_id,
+        redirectTarget: "_modal", // इससे यूजर उसी पेज पर रहेगा
+      };
+
+      // Step C: Open Cashfree Modal & Handle Payment Response
+      cashfree.checkout(checkoutOptions).then(async (result) => {
+        if (result.error) {
+          alert(`Payment Failed: ${result.error.message}`);
+          setIsProcessing(false);
+        }
+        
+        if (result.paymentDetails) {
+          // Step D: Verify Payment on Backend
           const verifyData = await fetch("/api/checkout/verify", {
             method: "POST",
             headers: { 
@@ -179,11 +198,7 @@ export default function CartPage() {
               "Authorization": `Bearer ${token}` 
             },
             body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              dbOrderId: orderData.dbOrderId, 
-              amount: total
+              orderId: orderData.order_id 
             }),
           }).then((t) => t.json());
 
@@ -191,22 +206,17 @@ export default function CartPage() {
             router.push("/success"); 
           } else {
             alert("Payment Verification Failed!");
+            setIsProcessing(false);
           }
-        },
-        theme: { color: brandBrown },
-      };
-
-      const paymentObject = new window.Razorpay(options);
-      paymentObject.open();
+        }
+      });
 
     } catch (error) {
       console.error(error);
       alert("Something went wrong!");
-    } finally {
       setIsProcessing(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-[#fdfbf7] p-4 md:p-8 lg:p-12 font-sans text-gray-800">
       
