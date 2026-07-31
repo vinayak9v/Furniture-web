@@ -7,7 +7,7 @@
 module.exports = {
   apps: [
     {
-      name: 'viazo-pm2',
+      name: 'gioteak-pm2',
       cwd: '/www/wwwroot/gioteak/Furniture-web',
       script: '/www/server/nodejs/v24.18.0/bin/npm',
       args: 'start',
@@ -22,7 +22,7 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: '5356',
-        NODE_PROJECT_NAME: 'viazo-pm2',
+        NODE_PROJECT_NAME: 'gioteak-pm2',
       },
       out_file: '/www/wwwlogs/pm2/gioteak-pm2/out.log',
       error_file: '/www/wwwlogs/pm2/gioteak-pm2/err.log',
