@@ -128,7 +128,7 @@ export default function Navbar() {
       >
         <div className="flex items-center gap-2">
           <Truck className="w-3.5 h-3.5" />
-          <span>Free Delivery on Orders Above ₹9999</span>
+          <span>Free Delivery on Orders Above ₹9999xx</span>
         </div>
 
         <div className="flex items-center gap-6">
@@ -156,7 +156,7 @@ export default function Navbar() {
         {/* 2. Desktop Navigation */}
         <nav className="hidden lg:flex items-center gap-8 relative">
           <Link href="/" className="text-[13px] font-bold text-[#5d6044] border-b-2 border-[#5d6044] pb-1 uppercase tracking-wide">
-            Homeeee
+            Home
           </Link>
           <Link href="/products" className="text-[13px] font-bold text-gray-800 hover:text-[#5d6044] uppercase tracking-wide transition-colors">
             Shop 
