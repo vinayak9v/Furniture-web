@@ -156,7 +156,7 @@ export default function Navbar() {
         {/* 2. Desktop Navigation */}
         <nav className="hidden lg:flex items-center gap-8 relative">
           <Link href="/" className="text-[13px] font-bold text-[#5d6044] border-b-2 border-[#5d6044] pb-1 uppercase tracking-wide">
-            Homeee
+            Homeeee
           </Link>
           <Link href="/products" className="text-[13px] font-bold text-gray-800 hover:text-[#5d6044] uppercase tracking-wide transition-colors">
             Shop 
