@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../../store/cartSlice'; // Update path if needed
 import Link from 'next/link';
@@ -16,11 +16,11 @@ import Footer from '@/components/Footer';
 export default function ProductDetails({ params }) {
   const brandBrown = "#a66a38"; 
   const brandGreen = "#7a8a6b";
-  const API_BASE_URL = 'http://localhost:3000'; 
+  const API_BASE_URL = '';
 
   const dispatch = useDispatch();
   const router = useRouter();
-  const slug = params.slug;
+  const { slug } = use(params);
 
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]); // NEW STATE
@@ -324,7 +324,7 @@ export default function ProductDetails({ params }) {
         <div className="flex items-center gap-2 text-sm text-gray-600 mb-6 overflow-x-auto whitespace-nowrap">
           <Link href="/" className="hover:text-gray-900">Home</Link>
           <ChevronRight size={14} />
-          <Link href="/shop" className="hover:text-gray-900">Shop</Link>
+          <Link href="/products" className="hover:text-gray-900">Shop</Link>
           <ChevronRight size={14} />
           <Link href={`/category/${product.categoryId}`} className="hover:text-gray-900 capitalize">{product.categoryName || 'Category'}</Link>
           <ChevronRight size={14} />
@@ -556,7 +556,7 @@ export default function ProductDetails({ params }) {
             <h2 className="text-2xl font-bold text-gray-900 mb-8 font-serif">Related Products</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
               {relatedProducts.slice(0, 4).map((rp) => (
-                <Link href={`/product/${rp.slug}`} key={rp.id} className="group flex flex-col border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition bg-white">
+                <Link href={`/products/${rp.slug}`} key={rp.id} className="group flex flex-col border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition bg-white">
                   <div className="relative aspect-square bg-[#f7f5f0] p-4 flex items-center justify-center">
                     <img 
                       src={getImageUrl(rp.thumbnail)} 

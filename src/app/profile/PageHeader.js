@@ -35,7 +35,7 @@ export default function PageHeader() {
           
           <ChevronRight size={16} className="text-gray-400" />
           
-          <Link href="/shop" className="hover:text-gray-900 transition-colors">
+          <Link href="/products" className="hover:text-gray-900 transition-colors">
             Shop
           </Link>
 

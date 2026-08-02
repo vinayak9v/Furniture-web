@@ -3,7 +3,7 @@ import db from "@/lib/db";
 
 export async function GET(req, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // कैटेगरी ID के आधार पर प्रोडक्ट्स लाना
     const [products] = await db.query(

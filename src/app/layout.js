@@ -18,41 +18,12 @@ const geistMono = Geist_Mono({
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <head>
-        {/* Optional: Add JSON-LD Structured Data for Local Business/Organization */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "AgriculturalBusiness",
-              "name": "Morvi Crop Science Pvt Ltd",
-              "url": "https://www.morvicropscience.com",
-              "description": "Leading provider of agricultural seeds, insecticides, and fertilizers.",
-              "address": {
-                "@type": "PostalAddress",
-                "addressCountry": "IN"
-              },
-              "contactPoint": {
-                "@type": "ContactPoint",
-                "telephone": "+91-9876543210", 
-                "contactType": "customer service"
-              }
-            }),
-          }}
-        />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased text-gray-900`}
       >
-        {/* <Navbarr /> */}
-        {/* <MorviNavbar/> */}
-        
-      <Provider store={store}>
-            {children}
-       </Provider>;
-        
-        {/* <Footer /> */}
+        <Provider store={store}>
+          {children}
+        </Provider>
       </body>
     </html>
   );

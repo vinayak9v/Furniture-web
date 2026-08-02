@@ -77,7 +77,7 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-bold text-sm tracking-widest uppercase mb-6">Shop</h4>
             <ul className="space-y-4 text-sm">
-              <li><Link href="#" className="hover:text-white transition-colors">All Products</Link></li>
+              <li><Link href="/products" className="hover:text-white transition-colors">All Products</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Living Room</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Bedroom</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Dining Room</Link></li>
@@ -90,11 +90,11 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-bold text-sm tracking-widest uppercase mb-6">Company</h4>
             <ul className="space-y-4 text-sm">
-              <li><Link href="#" className="hover:text-white transition-colors">About Us</Link></li>
+              <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Our Story</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Careers</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Blog</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Contact Us</Link></li>
+              <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
             </ul>
           </div>
 

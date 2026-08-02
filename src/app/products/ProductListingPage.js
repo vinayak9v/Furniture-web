@@ -12,7 +12,7 @@ import {
 export default function ProductListingPage() {
   const brandGreen = "#5d6044";
   const brandBrown = "#8c5a35";
-  const API_BASE_URL = 'http://localhost:3000'; // आपकी API का बेस URL
+  const API_BASE_URL = '';
 
   const dispatch = useDispatch();
 

@@ -6,7 +6,7 @@ import Link from 'next/link'; // <-- Link इम्पोर्ट किया
 
 export default function CategoriesSection() {
   const brandColor = "#5d6044";
-  const API_BASE_URL = 'http://localhost:3000'; 
+  const API_BASE_URL = '';
 
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

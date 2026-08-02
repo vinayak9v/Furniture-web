@@ -4,7 +4,7 @@ import db from "../../../../lib/db";
 export async function GET(req, { params }) {
   try {
 
-    const { slug } = params;
+    const { slug } = await params;
 
     // ================= GET PRODUCT =================
     const [products] = await db.execute(

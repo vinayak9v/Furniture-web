@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../../store/cartSlice'; 
@@ -10,10 +10,10 @@ import Footer from '@/components/Footer';
 
 export default function CategoryProductsPage({ params }) {
   const brandGreen = "#5d6044";
-  const API_BASE_URL = 'http://localhost:3000'; 
+  const API_BASE_URL = '';
   
   const dispatch = useDispatch();
-  const categoryId = params.id;
+  const { id: categoryId } = use(params);
 
   const [products, setProducts] = useState([]);
   const [categoryName, setCategoryName] = useState('');
@@ -82,7 +82,7 @@ export default function CategoryProductsPage({ params }) {
             <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
               <Link href="/" className="hover:text-gray-900">Home</Link>
               <ChevronRight size={14} />
-              <Link href="/categories" className="hover:text-gray-900">Categories</Link>
+              <Link href="/products" className="hover:text-gray-900">Categories</Link>
               <ChevronRight size={14} />
               <span className="text-gray-900 font-medium capitalize">{categoryName || 'Loading...'}</span>
             </div>

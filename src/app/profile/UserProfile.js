@@ -374,7 +374,7 @@ export default function UserProfile() {
                       <div className="flex items-center gap-6 flex-1 w-full">
                         <div className="w-20 h-20 bg-gray-100 rounded-xl overflow-hidden shrink-0">
                           <img 
-                            src={order.image?.startsWith('http') ? order.image : `http://localhost:3000${order.image}`} 
+                            src={order.image?.startsWith('http') ? order.image : order.image}
                             alt={order.itemName} 
                             className="w-full h-full object-cover mix-blend-multiply" 
                             onError={(e) => e.target.src = '/placeholder-image.jpg'}

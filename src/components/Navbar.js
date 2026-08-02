@@ -164,7 +164,7 @@ export default function Navbar() {
 
           {/* === COLLECTIONS HOVER DROPDOWN === */}
           <div className="group relative">
-            <Link href="/collections" className="text-[13px] font-bold text-gray-800 hover:text-[#5d6044] flex items-center gap-1 uppercase tracking-wide transition-colors py-2">
+            <Link href="/products" className="text-[13px] font-bold text-gray-800 hover:text-[#5d6044] flex items-center gap-1 uppercase tracking-wide transition-colors py-2">
               Collections <ChevronDown className="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" strokeWidth={2.5}/>
             </Link>
 

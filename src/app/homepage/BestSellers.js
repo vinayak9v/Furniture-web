@@ -8,7 +8,7 @@ import { addToCart } from '../store/cartSlice';
 
 export default function BestSellers() {
   const brandColor = "#5d6044";
-  const API_BASE_URL = 'http://localhost:3000'; 
+  const API_BASE_URL = '';
 
   const dispatch = useDispatch();
 

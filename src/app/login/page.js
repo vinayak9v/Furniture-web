@@ -2,13 +2,14 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation'; // <-- Redirect के लिए इम्पोर्ट किया
-import { 
-  Mail, 
-  Lock, 
-  EyeOff, 
-  Truck, 
-  Award, 
-  ShieldCheck, 
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Truck,
+  Award,
+  ShieldCheck,
   Home,
   LockKeyhole
 } from 'lucide-react';
@@ -19,6 +20,7 @@ export default function LoginPage() {
   // 1. स्टेट वैरिएबल्स बनाना
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -187,15 +189,22 @@ export default function LoginPage() {
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                     <Lock className="h-4 w-4 text-gray-400" />
                   </div>
-                  <input 
-                    type="password"
+                  <input
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password" 
+                    placeholder="Enter your password"
                     className="w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8c5a35]/20 focus:border-[#8c5a35] transition-all"
                   />
-                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center cursor-pointer">
-                    <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                  <div
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center cursor-pointer"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? (
+                      <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                    ) : (
+                      <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                    )}
                   </div>
                 </div>
               </div>

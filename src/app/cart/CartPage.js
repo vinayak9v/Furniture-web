@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'; 
 import { useSelector, useDispatch } from 'react-redux';
-import { updateQuantity, removeFromCart } from '../store/cartSlice'; 
+import { updateQuantity, removeFromCart, clearCart } from '../store/cartSlice';
 import { 
   Minus, Plus, Trash2, ArrowLeft, Lock, ChevronRight, Loader2, MapPin, X, User
 } from 'lucide-react'; // Added 'User' icon
@@ -203,7 +203,8 @@ export default function CartPage() {
           }).then((t) => t.json());
 
           if (verifyData.success) {
-            router.push("/success"); 
+            dispatch(clearCart());
+            router.push("/success");
           } else {
             alert("Payment Verification Failed!");
             setIsProcessing(false);
@@ -286,7 +287,7 @@ export default function CartPage() {
             )}
           </div>
           
-          <Link href="/shop" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white border border-gray-200 rounded-lg text-sm font-bold hover:bg-gray-50 transition-colors">
+          <Link href="/products" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white border border-gray-200 rounded-lg text-sm font-bold hover:bg-gray-50 transition-colors">
             <ArrowLeft size={16} /> Continue Shopping
           </Link>
         </div>
